@@ -1,0 +1,21 @@
+{
+  "name": "xdapp-datas",
+  "version": "1.0.0",
+  "description": "handler xdapp log",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "xdapp",
+    "log"
+  ],
+  "author": "chenhong",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^1.3.0",
+    "express": "^4.13.0",
+    "phpjs": "^1.3.2",
+    "supervisor": "^0.7.0"
+  }
+}

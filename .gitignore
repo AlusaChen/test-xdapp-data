@@ -1,0 +1,6 @@
+Icon?
+.DS_Store
+.svn
+/.idea
+/.idea/*
+node_modules
