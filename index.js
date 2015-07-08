@@ -1,23 +1,10 @@
-var express = require('express'),
-    app = express();
+var io = require('socket.io')(3000);
+var xdlogs = require('./handler_log');
 
-var handler_log = require('./handler_log');
+var logs = io.of('/logs') .on('connection', xdlogs.run);
 
-//var handler_data = require('./handler_data');
-//app.use('/datas', handler_data);
-
-global.handler_ret_data = function(msg, data, code) {
-    if(!msg) msg = 'succeed';
+global.return_ret = function(socket, event, data, code) {
+    if(!event) event = 'succeed';
     if(!code) code = 1;
-    if(!data) data = {};
-
-    return {
-        code : code,
-        message : msg,
-        data : data
-    };
+    socket.emit(event, data, code);
 };
-
-app.use('/logs', handler_log);
-
-app.listen(3000);

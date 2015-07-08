@@ -1,42 +1,36 @@
-var express = require('express');
-var router = express.Router();
-var indexes = require('./indexes'),
-    docs = require('./docs');
+var doc = require('./docs');
 
-router.get('/', function(req, res) {
-    var ret = handler_ret_data('Welcome!');
-    res.json(ret);
-});
+exports.run = function(socket){
+    //获取文档数目
+    socket.on('count', function(data){
+        return_ret(socket, 'ready', 'ready');
+        if(data['app'] && data['log'])
+        {
+            doc.count(socket, data);
+        }
+        else
+        {
+            return_ret(socket, 'failed', 'need params', -1)
+        }
+    });
 
-
-router.use('/:type/:app',function checkapp(req, res, next) {
-    if(req.params.app != 'testapp')
-    {
-        res.json(handler_ret_data('app error', {}, -1));
-        return;
-    }
-    next();
-});
-
-//查看索引
-router.get('/list_indexes/:app', function(req, res) {
-    indexes.list(req, res);
-});
-
-//创建索引
-router.post('/create_index/:app', function(req, res) {
-    indexes.create(req, res);
-});
-
-//删除索引
-router.get('/drop_index/:app', function(req, res) {
-    indexes.drop(req, res);
-});
-
-//删除日志文档
-router.get('/remove_doc/:app', function(req, res) {
-    docs.remove(req, res);
-});
+    //清除数据
+    socket.on('clear', function(data){
+        return_ret(socket, 'ready', 'ready');
+        if(data['app'] && data['log'] && Object.keys(data['where']).length>0)
+        {
+            doc.remove(socket, data);
+        }
+        else
+        {
+            return_ret(socket, 'failed', 'need params', -1)
+        }
+    });
 
 
-module.exports = router;
+    socket.on('disconnect', function(){
+        //console.log(socket.id + ' disconnect');
+    });
+
+
+};
