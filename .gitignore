@@ -4,3 +4,4 @@ Icon?
 /.idea
 /.idea/*
 node_modules
+*.runtime
