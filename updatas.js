@@ -1,6 +1,8 @@
 //更新文档测试
+/*
 var MongoClient = require('mongodb').MongoClient,
     ObjectID = require('mongodb').ObjectID;
+    */
 var redis = require("redis");
 var async = require('async'),
     php = require('phpjs'),
@@ -16,6 +18,35 @@ var sdate = program.sdate;
 var edate = program.edate;
 
 
+var
+    Db = require('mongodb').Db,
+    Server = require('mongodb').Server,
+    poolModule = require('generic-pool');
+
+//settings = require('../settings'),
+
+var settings = {
+    'db' : 'game_kssg_log',
+    'host' : '127.0.0.1'
+};
+
+var mongoPool = poolModule.Pool({
+    name : "mongoPool",
+    create : function(callback) {
+        var mongodb = new Db(settings.db, new Server(settings.host, 27017), {safe: true});
+        mongodb.open(function(err, db) {
+            callback(err, db);
+        });
+    },
+    destroy : function(mongodb) {
+        mongodb.close();
+    },
+    max : 5,
+    //min : 5,
+    idleTimeoutMillis : 30000,
+    log : true
+});
+
 
 function get_where()
 {
@@ -28,13 +59,11 @@ function get_where()
     };
 }
 
-var mongo_url = 'mongodb://127.0.0.1:27017/game_kssg_log';
-
 function run()
 {
     async.waterfall([
         function(callback) {
-            MongoClient.connect(mongo_url, function(err, db) {
+            mongoPool.acquire(function(err, db){
                 callback(err, db);
             });
         },
@@ -88,7 +117,7 @@ function run()
     ], function(err, db, res) {
         console.log('up redis ok');
         if(err) console.log('err run ' + err);
-        db.close();
+        mongoPool.release(db);
         run_all();
     });
 }
@@ -110,7 +139,7 @@ function run_other(log, cb)
 {
     async.waterfall([
         function(callback) {
-            MongoClient.connect(mongo_url, function(err, db) {
+            mongoPool.acquire(function(err, db){
                 callback(err, db);
             });
         },
@@ -150,10 +179,10 @@ function run_other(log, cb)
     ], function(err, db) {
         console.log('up '+log+' ok');
         if(err) console.log('err run other '+err);
-        db.close();
+        mongoPool.release(db);
         cb(err);
     });
 }
 
 
-//run();
+run();
